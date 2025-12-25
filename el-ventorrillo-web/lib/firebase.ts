@@ -14,49 +14,80 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
 };
 
-// Validar que las variables de entorno estén configuradas
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error('Error: Las variables de entorno de Firebase no están configuradas correctamente.');
-  console.error('Verifica que el archivo .env.local existe y contiene las variables NEXT_PUBLIC_FIREBASE_*');
-}
+// Cache para las instancias
+let app: FirebaseApp | null = null;
+let authInstance: Auth | null = null;
+let dbInstance: Firestore | null = null;
+let storageInstance: FirebaseStorage | null = null;
 
-// Inicializar Firebase solo si no está ya inicializado
-let app: FirebaseApp;
-if (getApps().length === 0) {
+function getFirebaseApp(): FirebaseApp {
+  if (app) {
+    return app;
+  }
+
+  // Si hay apps inicializadas, usar la primera
+  const existingApps = getApps();
+  if (existingApps.length > 0) {
+    app = existingApps[0];
+    return app;
+  }
+
+  // Validar configuración
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    throw new Error('Firebase no está configurado. Verifica las variables de entorno NEXT_PUBLIC_FIREBASE_* en Vercel.');
+  }
+
   try {
     app = initializeApp(firebaseConfig);
-    console.log('Firebase inicializado correctamente');
+    return app;
   } catch (error) {
     console.error('Error inicializando Firebase:', error);
     throw error;
   }
-} else {
-  app = getApps()[0];
 }
 
-// Exportar servicios de Firebase con validación
-let authInstance: Auth;
-let dbInstance: Firestore;
-let storageInstance: FirebaseStorage;
+// Lazy getters usando Object.defineProperty para evitar inicialización durante import
+function createLazyGetter<T>(getter: () => T): T {
+  let value: T | null = null;
+  return new Proxy({} as T, {
+    get(_target, prop) {
+      if (!value) {
+        value = getter();
+      }
+      const val = value as any;
+      if (typeof val[prop] === 'function') {
+        return val[prop].bind(val);
+      }
+      return val[prop];
+    }
+  });
+}
 
-try {
-  authInstance = getAuth(app);
-  dbInstance = getFirestore(app);
-  storageInstance = getStorage(app);
-  
-  // Validar que las instancias se crearon correctamente
-  if (!dbInstance) {
-    console.error('Error: No se pudo inicializar Firestore');
-    throw new Error('Firestore no se pudo inicializar');
+// Exportar instancias lazy (solo se inicializan cuando se usan)
+export const auth = createLazyGetter<Auth>(() => {
+  if (!authInstance) {
+    authInstance = getAuth(getFirebaseApp());
   }
-} catch (error) {
-  console.error('Error creando instancias de Firebase:', error);
-  throw error;
-}
+  return authInstance;
+});
 
-export const auth: Auth = authInstance;
-export const db: Firestore = dbInstance;
-export const storage: FirebaseStorage = storageInstance;
+export const db = createLazyGetter<Firestore>(() => {
+  if (!dbInstance) {
+    dbInstance = getFirestore(getFirebaseApp());
+    if (!dbInstance) {
+      throw new Error('Firestore no se pudo inicializar');
+    }
+  }
+  return dbInstance;
+});
 
-export default app;
+export const storage = createLazyGetter<FirebaseStorage>(() => {
+  if (!storageInstance) {
+    storageInstance = getStorage(getFirebaseApp());
+  }
+  return storageInstance;
+});
 
+// Export default también lazy
+const getDefaultApp = () => getFirebaseApp();
+export default getDefaultApp;
