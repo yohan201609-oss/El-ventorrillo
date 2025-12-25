@@ -28,6 +28,18 @@ export default async function Home() {
   } catch (err) {
     error = err instanceof Error ? err : new Error(String(err));
     console.error('Error cargando productos:', err);
+    // Log más detallado para debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Detalles del error:', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        firebaseConfig: {
+          hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+          hasProjectId: !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        }
+      });
+    }
   }
 
   return (
