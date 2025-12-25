@@ -4,6 +4,7 @@ import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ChatButton from '@/components/ChatButton';
+import type { Product } from '@/types/product';
 
 export const metadata: Metadata = {
   title: 'El Ventorrillo - Marketplace de Artesanías y Segunda Mano',
@@ -16,13 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  let products = [];
-  let error = null;
+  let products: Product[] = [];
+  let error: Error | null = null;
 
   try {
     products = await getProducts();
   } catch (err) {
-    error = err;
+    error = err instanceof Error ? err : new Error(String(err));
     console.error('Error cargando productos:', err);
   }
 
