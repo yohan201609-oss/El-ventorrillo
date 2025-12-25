@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description: "Plataforma de compra y venta de productos artesanales y de segunda mano en República Dominicana",
 };
 
+// Forzar renderizado dinámico para evitar prerenderizado
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: Readonly<{

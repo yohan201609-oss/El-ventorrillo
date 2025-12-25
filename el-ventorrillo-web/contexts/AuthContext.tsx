@@ -23,21 +23,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
+      if (!mounted) return;
+      
       setUser(firebaseUser);
       
       if (firebaseUser) {
         // Obtener perfil del usuario desde Firestore
-        const profile = await getUserProfile(firebaseUser.uid);
-        setUserProfile(profile);
+        try {
+          const profile = await getUserProfile(firebaseUser.uid);
+          if (mounted) {
+            setUserProfile(profile);
+          }
+        } catch (error) {
+          console.error('Error obteniendo perfil:', error);
+          if (mounted) {
+            setUserProfile(null);
+          }
+        }
       } else {
         setUserProfile(null);
       }
       
-      setLoading(false);
+      if (mounted) {
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   return (

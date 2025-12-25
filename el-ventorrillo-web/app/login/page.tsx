@@ -10,6 +10,8 @@ import AuthGuard from '@/components/AuthGuard';
 
 // Forzar renderizado dinámico (no prerenderizar)
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const dynamicParams = true;
 
 export default function LoginPage() {
   const router = useRouter();
