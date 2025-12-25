@@ -46,10 +46,10 @@ function getFirebaseApp(): FirebaseApp {
   }
 }
 
-// Lazy getters usando Object.defineProperty para evitar inicialización durante import
+// Lazy getters usando Proxy para evitar inicialización durante import
 function createLazyGetter<T>(getter: () => T): T {
   let value: T | null = null;
-  return new Proxy({} as T, {
+  return new Proxy({} as any, {
     get(_target, prop) {
       if (!value) {
         value = getter();
@@ -60,7 +60,7 @@ function createLazyGetter<T>(getter: () => T): T {
       }
       return val[prop];
     }
-  });
+  }) as T;
 }
 
 // Exportar instancias lazy (solo se inicializan cuando se usan)
