@@ -13,6 +13,9 @@ import AuthGuard from '@/components/AuthGuard';
 import Loading from '@/components/Loading';
 import ProductCard from '@/components/ProductCard';
 import toast from 'react-hot-toast';
+
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
 import { 
   User, 
   Mail, 

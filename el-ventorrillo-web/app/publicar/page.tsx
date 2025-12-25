@@ -9,6 +9,9 @@ import { createProduct } from '@/lib/firestore';
 import { ProductType, ProductCategory } from '@/types/product';
 import { getCategoryLabel } from '@/lib/utils';
 import AuthGuard from '@/components/AuthGuard';
+
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
 import { 
   Upload, 
   X, 

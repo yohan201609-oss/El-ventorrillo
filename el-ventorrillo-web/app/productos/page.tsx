@@ -8,6 +8,9 @@ import ProductCard from '@/components/ProductCard';
 import { Product, ProductType, ProductCategory } from '@/types/product';
 import { getCategoryLabel } from '@/lib/utils';
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'date-asc' | 'date-desc';
 
 export default function ProductsPage() {

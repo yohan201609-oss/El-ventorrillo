@@ -12,6 +12,9 @@ import ChatInput from '@/components/ChatInput';
 import AuthGuard from '@/components/AuthGuard';
 import { ArrowLeft, Package, User, Loader2, MessageSquare } from 'lucide-react';
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 export default function ChatPage() {
   const params = useParams();
   const router = useRouter();

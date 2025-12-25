@@ -8,6 +8,9 @@ import { registerUser, loginWithGoogle } from '@/lib/auth';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import AuthGuard from '@/components/AuthGuard';
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const router = useRouter();
 

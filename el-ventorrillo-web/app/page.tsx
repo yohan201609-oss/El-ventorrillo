@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   let products: Product[] = [];
   let error: Error | null = null;

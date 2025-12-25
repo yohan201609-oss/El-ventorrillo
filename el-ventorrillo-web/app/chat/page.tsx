@@ -10,6 +10,9 @@ import { formatDate } from '@/lib/utils';
 import AuthGuard from '@/components/AuthGuard';
 import { MessageSquare, Package, User } from 'lucide-react';
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 export default function ChatListPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();

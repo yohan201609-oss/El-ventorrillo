@@ -10,6 +10,9 @@ import ShareButton from '@/components/ShareButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import type { Metadata } from 'next';
 
+// Forzar renderizado dinámico (no prerenderizar)
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     id: string;
