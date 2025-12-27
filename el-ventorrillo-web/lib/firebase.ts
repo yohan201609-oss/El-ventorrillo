@@ -33,8 +33,18 @@ function getFirebaseApp(): FirebaseApp {
   }
 
   // Validar configuración
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    throw new Error('Firebase no está configurado. Verifica las variables de entorno NEXT_PUBLIC_FIREBASE_* en Vercel.');
+  const missingVars: string[] = [];
+  if (!firebaseConfig.apiKey) missingVars.push('NEXT_PUBLIC_FIREBASE_API_KEY');
+  if (!firebaseConfig.projectId) missingVars.push('NEXT_PUBLIC_FIREBASE_PROJECT_ID');
+  if (!firebaseConfig.authDomain) missingVars.push('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
+  if (!firebaseConfig.storageBucket) missingVars.push('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET');
+  if (!firebaseConfig.messagingSenderId) missingVars.push('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID');
+  if (!firebaseConfig.appId) missingVars.push('NEXT_PUBLIC_FIREBASE_APP_ID');
+  
+  if (missingVars.length > 0) {
+    const errorMessage = `Firebase no está configurado. Faltan las siguientes variables de entorno en Vercel:\n${missingVars.map(v => `  - ${v}`).join('\n')}\n\nVe a Vercel Dashboard → Settings → Environment Variables y configura estas variables.\nMarca las variables para: Production, Preview y Development.`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   try {
@@ -47,6 +57,7 @@ function getFirebaseApp(): FirebaseApp {
 }
 
 // Lazy getters usando Proxy para evitar inicialización durante import
+// Nota: Auth y Storage funcionan bien con Proxy, pero Firestore necesita una instancia real
 function createLazyGetter<T>(getter: () => T): T {
   let value: T | null = null;
   return new Proxy({} as any, {
@@ -63,6 +74,17 @@ function createLazyGetter<T>(getter: () => T): T {
   }) as T;
 }
 
+// Función helper para obtener la instancia real de Firestore
+function getDbInstance(): Firestore {
+  if (!dbInstance) {
+    dbInstance = getFirestore(getFirebaseApp());
+    if (!dbInstance) {
+      throw new Error('Firestore no se pudo inicializar');
+    }
+  }
+  return dbInstance;
+}
+
 // Exportar instancias lazy (solo se inicializan cuando se usan)
 export const auth = createLazyGetter<Auth>(() => {
   if (!authInstance) {
@@ -71,15 +93,10 @@ export const auth = createLazyGetter<Auth>(() => {
   return authInstance;
 });
 
-export const db = createLazyGetter<Firestore>(() => {
-  if (!dbInstance) {
-    dbInstance = getFirestore(getFirebaseApp());
-    if (!dbInstance) {
-      throw new Error('Firestore no se pudo inicializar');
-    }
-  }
-  return dbInstance;
-});
+// Para Firestore, necesitamos exportar la instancia real (no un Proxy)
+// porque collection() y otras funciones de Firestore verifican el tipo del objeto
+// Inicializamos cuando se importa, pero solo en cliente (los módulos que usan db son 'use client')
+export const db = getDbInstance();
 
 export const storage = createLazyGetter<FirebaseStorage>(() => {
   if (!storageInstance) {
