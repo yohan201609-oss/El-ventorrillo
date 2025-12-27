@@ -161,7 +161,7 @@ export default function ProductsPage() {
             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 sticky top-24">
               {/* Filtro por categoría */}
               <div>
-                <label className="block text-sm font-medium text-black mb-2">
+                <label className="block text-sm font-medium !text-black mb-2">
                   Categoría
                 </label>
                 <select
@@ -180,7 +180,7 @@ export default function ProductsPage() {
 
               {/* Ordenamiento */}
               <div>
-                <label className="block text-sm font-medium text-black mb-2">
+                <label className="block text-sm font-medium !text-black mb-2">
                   Ordenar por
                 </label>
                 <select
